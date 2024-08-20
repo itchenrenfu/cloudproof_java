@@ -442,7 +442,7 @@ public class CertificateAuthorityTest {
                         "ZHOULUDA",
                         "ZLD",
                         "itchenrenfu@163.com",
-                        1,
+                        365,
                         extensions);
         System.out.println(resp.getUniqueIdentifier());
     }
