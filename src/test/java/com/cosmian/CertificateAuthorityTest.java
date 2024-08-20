@@ -4,18 +4,14 @@ import cn.hutool.http.HttpUtil;
 
 import com.cosmian.jna.covercrypt.structs.Policy;
 import com.cosmian.rest.abe.KmsClient;
-import com.cosmian.rest.kmip.operations.Certify;
 import com.cosmian.rest.kmip.operations.CertifyResponse;
 import com.cosmian.rest.kmip.types.*;
 import com.cosmian.utils.CloudproofException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 /**
  * 证书颁发
@@ -427,50 +423,11 @@ public class CertificateAuthorityTest {
 
     @Test
     public void certifyCreate2() throws JsonProcessingException, CloudproofException {
-        Attributes commonAttributes =
-                new Attributes(ObjectType.Private_Key, Optional.of(CryptographicAlgorithm.RSA));
-        commonAttributes.setKeyFormatType(Optional.of(KeyFormatType.TransparentRSAPrivateKey));
-        commonAttributes.setCryptographicLength(Optional.of(4096));
-
-        CertificateAttributes certificateAttributes = new CertificateAttributes();
-        certificateAttributes.setCertificateSubjectC("FR");
-        certificateAttributes.setCertificateSubjectSt("IdF");
-        certificateAttributes.setCertificateSubjectL("Paris");
-        certificateAttributes.setCertificateSubjectO("AcmeTest");
-        certificateAttributes.setCertificateSubjectCn("bob2@acme.com");
-        certificateAttributes.setCertificateSubjectEmail("bob2@acme.com");
-
-        commonAttributes.setCertificateAttributes(Optional.of(certificateAttributes));
-
-        VendorAttribute vendorAttribute =
-                new VendorAttribute(
-                        "cosmian",
-                        "requested_validity_days",
-                        "365".getBytes(StandardCharsets.UTF_8));
-
-        VendorAttribute vendorAttribute2 =
-                new VendorAttribute("cosmian", "tag", "[]".getBytes(StandardCharsets.UTF_8));
 
         String extensions =
                 "[ v3_ca ]\n"
                         + "subjectKeyIdentifier=hash\n"
-                        + "authorityKeyIdentifier=keyid,issuer\n"
-                        + "basicConstraints=CA:true\n";
-        VendorAttribute vendorAttribute3 =
-                new VendorAttribute(
-                        "cosmian", "x509-extension", extensions.getBytes(StandardCharsets.UTF_8));
-
-        commonAttributes.setVendorAttributes(
-                Optional.of(new VendorAttribute[] {vendorAttribute, vendorAttribute2}));
-
-        Certify request = new Certify(commonAttributes);
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(request);
-        System.out.println(json);
-
-        String responseJson = kmip(json);
-
-        CertifyResponse response = mapper.readValue(responseJson, CertifyResponse.class);
+                        + "authorityKeyIdentifier=keyid,issuer\n";
 
         if (!TestUtils.serverAvailable(TestUtils.kmsServerUrl())) {
             throw new RuntimeException("Demo: No KMS Server available");
@@ -484,8 +441,8 @@ public class CertificateAuthorityTest {
                         "CHANGSHA",
                         "ZHOULUDA",
                         "ZLD",
-                        "chenrenfu@163.com",
-                        365,
+                        "itchenrenfu@163.com",
+                        1,
                         extensions);
         System.out.println(resp.getUniqueIdentifier());
     }
