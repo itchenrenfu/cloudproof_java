@@ -216,7 +216,10 @@ public class KmsClient {
                         certificateExtensions.getBytes(StandardCharsets.UTF_8));
 
         commonAttributes.setVendorAttributes(
-                Optional.of(new VendorAttribute[] {vendorAttribute, vendorAttribute2}));
+                Optional.of(
+                        new VendorAttribute[] {
+                            vendorAttribute, vendorAttribute2, vendorAttribute3
+                        }));
 
         Certify request = new Certify(commonAttributes);
         return this.kmip.certify(request);

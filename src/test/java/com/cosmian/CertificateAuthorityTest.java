@@ -432,6 +432,7 @@ public class CertificateAuthorityTest {
         if (!TestUtils.serverAvailable(TestUtils.kmsServerUrl())) {
             throw new RuntimeException("Demo: No KMS Server available");
         }
+        // acf9ce46-f33f-4eef-8bfb-83d4dfce1ea0  ca证书ID有效期1天
         // 创建KmsClient
         final KmsClient kmsClient = new KmsClient(TestUtils.kmsServerUrl(), TestUtils.apiKey());
         CertifyResponse resp =
@@ -439,10 +440,10 @@ public class CertificateAuthorityTest {
                         "CN",
                         "HUNAN",
                         "CHANGSHA",
-                        "ZHOULUDA",
-                        "ZLD",
+                        "HD",
+                        "CRF",
                         "itchenrenfu@163.com",
-                        365,
+                        1,
                         extensions);
         System.out.println(resp.getUniqueIdentifier());
     }

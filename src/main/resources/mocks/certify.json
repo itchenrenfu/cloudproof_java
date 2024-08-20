@@ -12,7 +12,7 @@
             {
               "tag": "CertificateSubjectCn",
               "type": "TextString",
-              "value": "bob2@acme.com"
+              "value": "bobtest2@acme.com"
             },
             {
               "tag": "CertificateSubjectO",
