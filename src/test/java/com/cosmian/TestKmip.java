@@ -4,12 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import com.cosmian.rest.kmip.data_structures.KeyBlock;
 import com.cosmian.rest.kmip.data_structures.KeyMaterial;
 import com.cosmian.rest.kmip.data_structures.KeyValue;
@@ -38,6 +32,12 @@ import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Optional;
+
 public class TestKmip {
 
     @BeforeAll
@@ -47,11 +47,19 @@ public class TestKmip {
 
     private SymmetricKey symmetricKey() {
         KeyValue kv =
-            new KeyValue(new KeyMaterial(new TransparentSymmetricKey("bytes".getBytes())), Optional.empty());
-        SymmetricKey symmetricKey = new SymmetricKey(new KeyBlock(KeyFormatType.TransparentSymmetricKey,
-            Optional.empty(), kv, CryptographicAlgorithm.AES, 256, Optional.empty()
+                new KeyValue(
+                        new KeyMaterial(new TransparentSymmetricKey("bytes".getBytes())),
+                        Optional.empty());
+        SymmetricKey symmetricKey =
+                new SymmetricKey(
+                        new KeyBlock(
+                                KeyFormatType.TransparentSymmetricKey,
+                                Optional.empty(),
+                                kv,
+                                CryptographicAlgorithm.AES,
+                                256,
+                                Optional.empty()));
 
-        ));
         return symmetricKey;
     }
 
@@ -61,10 +69,17 @@ public class TestKmip {
         ObjectType object_type = ObjectType.Symmetric_Key;
         Optional<Boolean> replace_existing = Optional.of(Boolean.TRUE);
         Optional<KeyWrapType> key_wrap_type = Optional.of(KeyWrapType.As_Registered);
-        Attributes attributes = new Attributes(object_type, Optional.of(CryptographicAlgorithm.AES));
+        Attributes attributes =
+                new Attributes(object_type, Optional.of(CryptographicAlgorithm.AES));
         SymmetricKey symmetricKey = symmetricKey();
         Import import_request =
-            new Import(unique_identifier, object_type, replace_existing, key_wrap_type, attributes, symmetricKey);
+                new Import(
+                        unique_identifier,
+                        object_type,
+                        replace_existing,
+                        key_wrap_type,
+                        attributes,
+                        symmetricKey);
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -94,9 +109,16 @@ public class TestKmip {
         ObjectType object_type = ObjectType.Symmetric_Key;
         Optional<Boolean> replace_existing = Optional.of(Boolean.TRUE);
         Optional<KeyWrapType> key_wrap_type = Optional.of(KeyWrapType.As_Registered);
-        Attributes attributes = new Attributes(object_type, Optional.of(CryptographicAlgorithm.AES));
+        Attributes attributes =
+                new Attributes(object_type, Optional.of(CryptographicAlgorithm.AES));
         Import import_request =
-            new Import(unique_identifier, object_type, replace_existing, key_wrap_type, attributes, null);
+                new Import(
+                        unique_identifier,
+                        object_type,
+                        replace_existing,
+                        key_wrap_type,
+                        attributes,
+                        null);
         ObjectMapper mapper = new ObjectMapper();
         try {
             mapper.writeValueAsString(import_request);
@@ -112,9 +134,16 @@ public class TestKmip {
         ObjectType object_type = ObjectType.Symmetric_Key;
         Optional<Boolean> replace_existing = Optional.empty();
         Optional<KeyWrapType> key_wrap_type = Optional.empty();
-        Attributes attributes = new Attributes(object_type, Optional.of(CryptographicAlgorithm.AES));
+        Attributes attributes =
+                new Attributes(object_type, Optional.of(CryptographicAlgorithm.AES));
         Import import_request =
-            new Import(unique_identifier, object_type, replace_existing, key_wrap_type, attributes, symmetricKey());
+                new Import(
+                        unique_identifier,
+                        object_type,
+                        replace_existing,
+                        key_wrap_type,
+                        attributes,
+                        symmetricKey());
 
         // ReplaceExisting KeyWrapType is not required
         ObjectMapper mapper = new ObjectMapper();
@@ -131,7 +160,7 @@ public class TestKmip {
         ResolvedType resolved_test_class = type_resolver.resolve(TestStruct.class);
         MemberResolver member_resolver = new MemberResolver(type_resolver);
         ResolvedTypeWithMembers resolved_test_class_with_members =
-            member_resolver.resolve(resolved_test_class, null, null);
+                member_resolver.resolve(resolved_test_class, null, null);
 
         for (ResolvedField f : resolved_test_class_with_members.getMemberFields()) {
             if (f.getName().equals("opt_string")) {
@@ -145,7 +174,10 @@ public class TestKmip {
     public void test_choice_optional_array() throws Exception {
         LinkedObjectIdentifier loi = new LinkedObjectIdentifier(UniqueIdentifier.ID_Placeholder);
         assertEquals(UniqueIdentifier.ID_Placeholder, loi.get());
-        Link link_1 = new Link(LinkType.Public_Key_Link, new LinkedObjectIdentifier(UniqueIdentifier.ID_Placeholder));
+        Link link_1 =
+                new Link(
+                        LinkType.Public_Key_Link,
+                        new LinkedObjectIdentifier(UniqueIdentifier.ID_Placeholder));
         Link link_2 = new Link(LinkType.Certificate_Link, new LinkedObjectIdentifier("cert"));
         TestStruct test_struct = new TestStruct(Optional.of("blah"), new Link[] {link_1, link_2});
 
@@ -160,10 +192,11 @@ public class TestKmip {
     @Test
     public void test_import_response_from_rust() throws Exception {
         String json =
-            "{\"tag\":\"ImportResponse\",\"type\":\"Structure\",\"value\":[{\"tag\":\"UniqueIdentifier\",\"type\":\"TextString\",\"value\":\"blah\"}]}";
+                "{\"tag\":\"ImportResponse\",\"type\":\"Structure\",\"value\":[{\"tag\":\"UniqueIdentifier\",\"type\":\"TextString\",\"value\":\"blah\"}]}";
         ObjectMapper mapper = new ObjectMapper();
         ImportResponse ir = mapper.readValue(json, ImportResponse.class);
         assertEquals("blah", ir.getUniqueIdentifier());
+        System.out.println(mapper.writeValueAsString(ir));
     }
 
     @Test
@@ -181,5 +214,4 @@ public class TestKmip {
         assertNotNull(tsk.getKey());
         assertTrue(tsk.getKey().length > 0);
     }
-
 }
