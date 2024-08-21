@@ -5,7 +5,6 @@ import cn.hutool.http.HttpUtil;
 import com.cosmian.jna.covercrypt.structs.Policy;
 import com.cosmian.rest.abe.KmsClient;
 import com.cosmian.rest.kmip.operations.CertifyResponse;
-import com.cosmian.rest.kmip.types.*;
 import com.cosmian.utils.CloudproofException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -22,11 +21,62 @@ import java.io.InputStream;
  * @className: CertificateAuthorityTest
  */
 public class CertificateAuthorityTest {
-    private static final String HOSTNAME = "http://192.168.187.130:9998";
+    private static final String HOSTNAME = "http://172.19.203.185:9998";
 
     public static void main(String[] args) throws CloudproofException {
+        String certificate =
+                "MIIDyTCCArGgAwIBAgIUAtz5wklQnSnCjUME8zXN+ihUQe4wDQYJKoZIhvcNAQEL\n"
+                        + "BQAwdDELMAkGA1UEBhMCQ04xDjAMBgNVBAgMBU5VSEFOMREwDwYDVQQHDAhDSEFO\n"
+                        + "R1NIQTERMA8GA1UECgwIWkhPVUxVREExCjAIBgNVBAsMAWYxDDAKBgNVBAMMA2Vy\n"
+                        + "dDEVMBMGCSqGSIb3DQEJARYGd2VyZXdyMB4XDTI0MDgxNTA3NDA1MVoXDTM0MDgx\n"
+                        + "MzA3NDA1MVowdDELMAkGA1UEBhMCQ04xDjAMBgNVBAgMBU5VSEFOMREwDwYDVQQH\n"
+                        + "DAhDSEFOR1NIQTERMA8GA1UECgwIWkhPVUxVREExCjAIBgNVBAsMAWYxDDAKBgNV\n"
+                        + "BAMMA2VydDEVMBMGCSqGSIb3DQEJARYGd2VyZXdyMIIBIjANBgkqhkiG9w0BAQEF\n"
+                        + "AAOCAQ8AMIIBCgKCAQEA0sQOGCeTnZC0WboRZ8JXrVhVpGgsKWFf/QrHZ56Jx/JH\n"
+                        + "4AohPAcZpDiVHSj0QUv5ocwoO88jHM38tRbkq+nFT+c9BKjeCEy1E+8KXys3WZZq\n"
+                        + "7lbSd7EVm0R8lK5NXH9EQ05d0focc5AfPHWQxQ1fzz9sFrwMpUV+zmfua8jqNiHT\n"
+                        + "MIwPmE5LBu4tMy0DCWTvnh5nvohs2Q6/31/qyG1TXmWcVb1bGInsGNp2Kg3Z8AUT\n"
+                        + "yytSKrs+0KlP+cAQQNbzVP8737NA40Xb9Im45YsXITlF+bi259CLoHFaTKF0fusi\n"
+                        + "1PB+RvYJKyxCiiciBtu5SmclkO/kkCb3D3+kQZIAswIDAQABo1MwUTAdBgNVHQ4E\n"
+                        + "FgQUysdqVCGggItiodxe8tGG07OrxMYwHwYDVR0jBBgwFoAUysdqVCGggItiodxe\n"
+                        + "8tGG07OrxMYwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAJP4N\n"
+                        + "gnP9amQzFU3aYHftjK+3mLez0kR1THELrIs7Cgy0AESqD2mxnj84ZXHRHPwa3ref\n"
+                        + "XzvNu4NSE9zcOVwaiSKkcTvARTwDLuVAU+IKDBA2auk0C2qcvKHBPjmPsh2zPE3v\n"
+                        + "OJYXD7ojFjTjsCUHanG3VeseIpM2TZVXI/kkvwZJhbj9kGXdvz8TXjRwbzZD0a3s\n"
+                        + "SLSldLbiSZC94I5j6whwDAnYw4nkFBg4iOVCdaehkgn+NC1PjOLrBGvrEAjgkD/5\n"
+                        + "DQcouLVYTjEotcZvDSIA1qo4OB9W5hXFEmlg9BWtdZvVOGbXCL0hIok1zV6t/lbz\n"
+                        + "JkutEL76G3I5AB2UBA==";
+
+        String certificateData = stringToHex(certificate);
+        System.out.println(certificateData);
         //        authTest();
-        ervifyTest();
+        String jsonStr =
+                "{\n"
+                        + "\t\"tag\": \"Validate\",\n"
+                        + "\t\"type\": \"Structure\",\n"
+                        + "\t\"value\": [{\n"
+                        + "\t\t\"tag\": \"Certificate\",\n"
+                        + "\t\t\"type\": \"Structure\",\n"
+                        + "\t\t\"value\": [{\n"
+                        + "\t\t\t\"tag\": \"Certificate\",\n"
+                        + "\t\t\t\"type\": \"ByteString\",\n"
+                        + "\t\t\t\"value\": \""
+                        + certificateData
+                        + "\"\n"
+                        + "\t\t}]\n"
+                        + "\t}, {\n"
+                        + "\t\t\"tag\": \"UniqueIdentifier\",\n"
+                        + "\t\t\"type\": \"Structure\",\n"
+                        + "\t\t\"value\": [{\n"
+                        + "\t\t\t\"tag\": \"UniqueIdentifier\",\n"
+                        + "\t\t\t\"type\": \"TextString\",\n"
+                        + "\t\t\t\"value\": \"a80b3010-9f74-4c57-aedd-40ef77756578\"\n"
+                        + "\t\t}]\n"
+                        + "\t}]\n"
+                        + "}";
+
+        kmip(jsonStr);
+        //        ervifyTest();
     }
 
     public static void ervifyTest() throws CloudproofException {
@@ -443,7 +493,7 @@ public class CertificateAuthorityTest {
                         "HD",
                         "CRF",
                         "itchenrenfu@163.com",
-                        1,
+                        365,
                         extensions);
         System.out.println(resp.getUniqueIdentifier());
     }
@@ -453,5 +503,13 @@ public class CertificateAuthorityTest {
         String response = HttpUtil.post(HOSTNAME + url, jsonBody);
         System.out.println(response);
         return response;
+    }
+
+    public static String stringToHex(String str) {
+        StringBuilder hex = new StringBuilder();
+        for (char c : str.toCharArray()) {
+            hex.append(String.format("%02X", (int) c));
+        }
+        return hex.toString();
     }
 }

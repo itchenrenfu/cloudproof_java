@@ -1,5 +1,7 @@
 package com.cosmian.rest.abe;
 
+import cn.hutool.core.codec.Base64;
+
 import com.alibaba.fastjson2.JSON;
 import com.cosmian.jna.covercrypt.structs.AccessPolicy;
 import com.cosmian.jna.covercrypt.structs.Policy;
@@ -7,12 +9,15 @@ import com.cosmian.rest.abe.data.DataToEncrypt;
 import com.cosmian.rest.abe.data.DecryptedData;
 import com.cosmian.rest.kmip.Kmip;
 import com.cosmian.rest.kmip.data_structures.RekeyAction;
+import com.cosmian.rest.kmip.objects.Certificate;
 import com.cosmian.rest.kmip.objects.PrivateKey;
 import com.cosmian.rest.kmip.objects.PublicKey;
 import com.cosmian.rest.kmip.operations.*;
 import com.cosmian.rest.kmip.types.*;
 import com.cosmian.utils.CloudproofException;
 import com.cosmian.utils.RestClient;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -373,6 +378,60 @@ public class KmsClient {
                             Optional.empty(),
                             publicMasterKey.attributes(),
                             publicMasterKey);
+            ImportResponse response = this.kmip.importObject(request);
+            return response.getUniqueIdentifier();
+        } catch (CloudproofException e) {
+            throw e;
+        } catch (Exception e) {
+            String err =
+                    "CoverCrypt"
+                            + ": Public Master Key could not be imported: "
+                            + e.getMessage()
+                            + "  "
+                            + e.getClass();
+            logger.severe(err);
+            throw new CloudproofException(err, e);
+        }
+    }
+
+    /**
+     * Import a Certificate
+     *
+     * @param publicKeyId the key Optional
+     * @param privateKeyId the key Optional
+     * @param certificate a Certificate
+     * @param replaceExisting if a key exists under this UID, replace it
+     * @return the UID of the imported key
+     * @throws CloudproofException if the import fails
+     */
+    public String importCertificate(
+            String publicKeyId, String privateKeyId, String certificate, boolean replaceExisting)
+            throws CloudproofException {
+        try {
+            Attributes attributes = new Attributes();
+
+            VendorAttribute vendorAttribute =
+                    new VendorAttribute("cosmian", "tag", "[]".getBytes(StandardCharsets.UTF_8));
+
+            attributes.setVendorAttributes(Optional.of(new VendorAttribute[] {vendorAttribute}));
+            if (StringUtils.isNotEmpty(publicKeyId) && StringUtils.isNotEmpty(privateKeyId)) {
+                Link pLink =
+                        new Link(LinkType.Public_Key_Link, new LinkedObjectIdentifier(publicKeyId));
+                Link kLink =
+                        new Link(
+                                LinkType.Private_Key_Link,
+                                new LinkedObjectIdentifier(privateKeyId));
+                attributes.setLink(Optional.of(new Link[] {pLink, kLink}));
+            }
+
+            Import request =
+                    new Import(
+                            "",
+                            ObjectType.Certificate,
+                            Optional.of(replaceExisting),
+                            Optional.empty(),
+                            attributes,
+                            new Certificate(CertificateType.X509, Base64.decode(certificate)));
             ImportResponse response = this.kmip.importObject(request);
             return response.getUniqueIdentifier();
         } catch (CloudproofException e) {

@@ -36,7 +36,7 @@ public final class TestUtils {
     public static String kmsServerUrl() {
         String v = System.getenv("COSMIAN_SERVER_URL");
         if (v == null) {
-            return "http://192.168.187.130:9998";
+            return "http://172.19.203.185:9998";
         }
         return v;
     }
