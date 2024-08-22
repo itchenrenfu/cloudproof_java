@@ -254,6 +254,27 @@ public class Kmip {
     }
 
     /**
+     * This operation requests the server to validate a Managed Object specified by its Unique
+     *
+     * @param request
+     * @return
+     * @throws CloudproofException
+     */
+    public ValidateResponse validateObject(Validate request) throws CloudproofException {
+        try {
+            String json_req = this.mapper.writeValueAsString(request);
+            logger.info(() -> "validate " + json_req);
+            String json_resp = this.rest_client.json_post("/kmip/2_1", json_req);
+            logger.info(() -> json_resp);
+            return this.mapper.readValue(json_resp, ValidateResponse.class);
+        } catch (Exception e) {
+            String err = "KMIP: Validate failed: " + e.getMessage() + "  " + e.getClass();
+            logger.severe(err);
+            throw new CloudproofException(err, e);
+        }
+    }
+
+    /**
      * This operation requests that the server search for one or more Managed Objects, depending on
      * the attributes specified in the request. All attributes are allowed to be used. The request
      * MAY contain a Maximum Items field, which specifies the maximum number of objects to be

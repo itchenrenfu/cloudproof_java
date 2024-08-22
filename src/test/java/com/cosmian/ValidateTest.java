@@ -6,11 +6,14 @@ import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.cosmian.rest.abe.KmsClient;
+import com.cosmian.rest.kmip.operations.ValidateResponse;
+import com.cosmian.utils.CloudproofException;
 
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * @author chenrenfu
@@ -50,13 +53,24 @@ public class ValidateTest {
         JSONObject jsonObject = JSON.parseObject(caJson, JSONObject.class);
         JSONArray jsonArray = jsonObject.getJSONObject("object").getJSONArray("CertificateValue");
 
-        byte[] bytes = CERTIFICATE.getBytes(StandardCharsets.UTF_8);
+        List<Integer> list = JSONArray.parseArray(jsonArray.toJSONString(), Integer.class);
 
-        byte[] bytes2 = Base64.encode(CERTIFICATE.getBytes()).getBytes();
+        byte[] byteArray = new byte[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            byteArray[i] = list.get(i).byteValue();
+        }
+
+        System.out.println(JSON.toJSONString(byteArray));
 
         byte[] bytes3 = Base64.decode(CERTIFICATE);
 
-        System.out.println(new String(bytes3));
+        System.out.println(JSON.toJSONString(bytes3));
+
+        for (byte b : bytes3) {
+            int intValue = (int) Byte.toUnsignedLong(b);
+            System.out.print(intValue + ",");
+        }
+
         //        for (int i = 0; i < jsonArray.size(); i++) {
         //            Integer integer = (Integer) jsonArray.get(i);
         //            String valueJson =
@@ -77,6 +91,24 @@ public class ValidateTest {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
         String jsonStr = TestUtil.readInputStreamAsString(inputStream);
         String responseJson = kmip(jsonStr);
+    }
+
+    @Test
+    public void validateCertificateTest() {
+        if (!TestUtils.serverAvailable(TestUtils.kmsServerUrl())) {
+            throw new RuntimeException("Demo: No KMS Server available");
+        }
+
+        // Access to the KMS server.
+        // Change the Cosmian Server Server URL and API key as appropriate
+        final KmsClient kmsClient = new KmsClient(TestUtils.kmsServerUrl(), TestUtils.apiKey());
+        try {
+            ValidateResponse validateResponse =
+                    kmsClient.validateCertificate("", "f1c381ce-0805-4c82-9dac-880add1d77e3");
+            System.out.println(JSON.toJSONString(validateResponse));
+        } catch (CloudproofException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String kmip(String jsonBody) {

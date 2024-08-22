@@ -1,31 +1,43 @@
 package com.cosmian.rest.kmip.objects;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 import com.cosmian.rest.kmip.types.CertificateType;
 import com.cosmian.rest.kmip.types.ObjectType;
 import com.cosmian.utils.CloudproofException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Optional;
+
 /**
- * A Managed Cryptographic Object that is a digital certificate. It is a DER-encoded X.509 public key certificate.
- * Object Encoding REQUIRED Certificate Structure Certificate Type Enumeration Yes Certificate Value Byte String Yes
+ * A Managed Cryptographic Object that is a digital certificate. It is a DER-encoded X.509 public
+ * key certificate. Object Encoding REQUIRED Certificate Structure Certificate Type Enumeration Yes
+ * Certificate Value Byte String Yes
  */
 public class Certificate extends KmipObject {
 
     @JsonProperty(value = "CertificateType")
-    private CertificateType certificateType;
+    private Optional<CertificateType> certificateType;
 
     @JsonProperty(value = "CertificateValue")
-    private byte[] certificateValue;
+    private Optional<byte[]> certificateValue;
 
-    protected Certificate() {
-    }
+    @JsonProperty(value = "Certificate")
+    private Optional<Integer[]> certificate;
 
-    public Certificate(CertificateType certificateType, byte[] certificateValue) {
+    protected Certificate() {}
+
+    public Certificate(
+            Optional<CertificateType> certificateType, Optional<byte[]> certificateValue) {
         this.certificateType = certificateType;
         this.certificateValue = certificateValue;
+    }
+
+    public Certificate(
+            Optional<CertificateType> certificateType,
+            Optional<byte[]> certificateValue,
+            Optional<Integer[]> certificate) {
+        this.certificateType = certificateType;
+        this.certificateValue = certificateValue;
+        this.certificate = certificate;
     }
 
     /**
@@ -33,7 +45,7 @@ public class Certificate extends KmipObject {
      *
      * @return the {@link CertificateType}
      */
-    public CertificateType getCertificateType() {
+    public Optional<CertificateType> getCertificateType() {
         return this.certificateType;
     }
 
@@ -42,7 +54,7 @@ public class Certificate extends KmipObject {
      *
      * @param certificateType the type
      */
-    public void setCertificateType(CertificateType certificateType) {
+    public void setCertificateType(Optional<CertificateType> certificateType) {
         this.certificateType = certificateType;
     }
 
@@ -51,7 +63,7 @@ public class Certificate extends KmipObject {
      *
      * @return the value
      */
-    public byte[] getCertificateValue() {
+    public Optional<byte[]> getCertificateValue() {
         return this.certificateValue;
     }
 
@@ -60,7 +72,7 @@ public class Certificate extends KmipObject {
      *
      * @param certificateValue the value
      */
-    public void setCertificateValue(byte[] certificateValue) {
+    public void setCertificateValue(Optional<byte[]> certificateValue) {
         this.certificateValue = certificateValue;
     }
 
@@ -70,7 +82,7 @@ public class Certificate extends KmipObject {
      * @param certificateType the {@link CertificateType}
      * @return the {@link Certificate}
      */
-    public Certificate certificateType(CertificateType certificateType) {
+    public Certificate certificateType(Optional<CertificateType> certificateType) {
         setCertificateType(certificateType);
         return this;
     }
@@ -81,32 +93,17 @@ public class Certificate extends KmipObject {
      * @param certificateValue the value
      * @return the {@link Certificate}
      */
-    public Certificate certificateValue(byte[] certificateValue) {
+    public Certificate certificateValue(Optional<byte[]> certificateValue) {
         setCertificateValue(certificateValue);
         return this;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        if (!(o instanceof Certificate)) {
-            return false;
-        }
-        Certificate certificate = (Certificate) o;
-        return Objects.equals(certificateType, certificate.certificateType)
-            && Arrays.equals(certificateValue, certificate.certificateValue);
+    public Optional<Integer[]> getCertificate() {
+        return certificate;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(certificateType, Arrays.hashCode(certificateValue));
-    }
-
-    @Override
-    public String toString() {
-        return "{" + " certificateType='" + getCertificateType() + "'" + ", certificateValue='"
-            + Arrays.toString(getCertificateValue()) + "'" + "}";
+    public void setCertificate(Optional<Integer[]> certificate) {
+        this.certificate = certificate;
     }
 
     @Override

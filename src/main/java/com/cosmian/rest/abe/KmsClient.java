@@ -492,6 +492,59 @@ public class KmsClient {
     }
 
     /**
+     * validate a certificate
+     *
+     * @param certificate optional
+     * @param uniqueIdentifier optional
+     * @return
+     * @throws CloudproofException
+     */
+    public ValidateResponse validateCertificate(String certificate, String uniqueIdentifier)
+            throws CloudproofException {
+        try {
+            Validate validate = null;
+            if (StringUtils.isNotEmpty(certificate)) {
+                byte[] bytes3 = Base64.decode(certificate);
+
+                Integer[] carray = new Integer[bytes3.length];
+                for (int i = 0; i < bytes3.length; i++) {
+                    byte b = bytes3[i];
+                    int intValue = (int) Byte.toUnsignedLong(b);
+                    carray[i] = intValue;
+                }
+                validate =
+                        new Validate(
+                                Optional.of(
+                                        new Certificate(
+                                                Optional.empty(),
+                                                Optional.empty(),
+                                                Optional.of(carray))),
+                                Optional.empty());
+            } else if (StringUtils.isNotEmpty(uniqueIdentifier)) {
+                validate =
+                        new Validate(
+                                Optional.empty(), Optional.of(new String[] {uniqueIdentifier}));
+            } else {
+                String err = "Certificate, UniqueIdentifier must fill a ";
+                logger.severe(err);
+                throw new CloudproofException(err);
+            }
+            ValidateResponse response = this.kmip.validateObject(validate);
+            return response;
+        } catch (CloudproofException e) {
+            throw e;
+        } catch (Exception e) {
+            String err =
+                    ": Public Master Key could not be imported: "
+                            + e.getMessage()
+                            + "  "
+                            + e.getClass();
+            logger.severe(err);
+            throw new CloudproofException(err, e);
+        }
+    }
+
+    /**
      * Import a Certificate
      *
      * @param publicKeyId the key Optional
@@ -528,7 +581,9 @@ public class KmsClient {
                             Optional.of(replaceExisting),
                             Optional.empty(),
                             attributes,
-                            new Certificate(CertificateType.X509, Base64.decode(certificate)));
+                            new Certificate(
+                                    Optional.of(CertificateType.X509),
+                                    Optional.of(Base64.decode(certificate))));
             ImportResponse response = this.kmip.importObject(request);
             return response.getUniqueIdentifier();
         } catch (CloudproofException e) {
