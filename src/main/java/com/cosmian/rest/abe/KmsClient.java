@@ -8,7 +8,7 @@ import com.cosmian.jna.covercrypt.structs.Policy;
 import com.cosmian.rest.abe.data.DataToEncrypt;
 import com.cosmian.rest.abe.data.DecryptedData;
 import com.cosmian.rest.kmip.Kmip;
-import com.cosmian.rest.kmip.data_structures.RekeyAction;
+import com.cosmian.rest.kmip.data_structures.*;
 import com.cosmian.rest.kmip.objects.Certificate;
 import com.cosmian.rest.kmip.objects.PrivateKey;
 import com.cosmian.rest.kmip.objects.PublicKey;
@@ -395,6 +395,103 @@ public class KmsClient {
     }
 
     /**
+     * Import a rsa Public Master Key in the KMS
+     *
+     * @param publicMasterKey the key
+     * @param replaceExisting if a key exists under this UID, replace it
+     * @return the UID of the imported key
+     * @throws CloudproofException if the import fails
+     */
+    public String importRsaPublicMasterKey(
+            String publicMasterKey, int cryptographicLength, boolean replaceExisting)
+            throws CloudproofException {
+        try {
+            PublicKey publicKey = new PublicKey();
+            KeyBlock keyBlock =
+                    new KeyBlock(
+                            KeyFormatType.PKCS8,
+                            Optional.empty(),
+                            new KeyValue(
+                                    new KeyMaterial(new ByteString(Base64.decode(publicMasterKey))),
+                                    Optional.empty()),
+                            CryptographicAlgorithm.RSA,
+                            cryptographicLength,
+                            Optional.empty());
+
+            publicKey.setKeyBlock(keyBlock);
+            Import request =
+                    new Import(
+                            "",
+                            ObjectType.Public_Key,
+                            Optional.of(replaceExisting),
+                            Optional.empty(),
+                            publicKey.attributes(),
+                            publicKey);
+            ImportResponse response = this.kmip.importObject(request);
+            return response.getUniqueIdentifier();
+        } catch (CloudproofException e) {
+            throw e;
+        } catch (Exception e) {
+            String err =
+                    ": Public Master Key could not be imported: "
+                            + e.getMessage()
+                            + "  "
+                            + e.getClass();
+            logger.severe(err);
+            throw new CloudproofException(err, e);
+        }
+    }
+
+    /**
+     * Import a rsa Public Master Key in the KMS
+     *
+     * @param publicMasterKey the key
+     * @param replaceExisting if a key exists under this UID, replace it
+     * @return the UID of the imported key
+     * @throws CloudproofException if the import fails
+     */
+    public String importRsaPrivateMasterKey(
+            String rsaPrivateMasterKey, int cryptographicLength, boolean replaceExisting)
+            throws CloudproofException {
+        try {
+            PrivateKey privateKey = new PrivateKey();
+            KeyBlock keyBlock =
+                    new KeyBlock(
+                            KeyFormatType.PKCS8,
+                            Optional.empty(),
+                            new KeyValue(
+                                    new KeyMaterial(
+                                            new ByteString(Base64.decode(rsaPrivateMasterKey))),
+                                    Optional.empty()),
+                            CryptographicAlgorithm.RSA,
+                            cryptographicLength,
+                            Optional.empty());
+
+            privateKey.setKeyBlock(keyBlock);
+            Import request =
+                    new Import(
+                            "",
+                            ObjectType.Private_Key,
+                            Optional.of(replaceExisting),
+                            Optional.empty(),
+                            privateKey.attributes(),
+                            privateKey);
+            ImportResponse response = this.kmip.importObject(request);
+            return response.getUniqueIdentifier();
+        } catch (CloudproofException e) {
+            throw e;
+        } catch (Exception e) {
+            String err =
+                    ": Public Master Key could not be imported: "
+                            + e.getMessage()
+                            + "  "
+                            + e.getClass();
+            logger.severe(err);
+            throw new CloudproofException(err, e);
+        }
+    }
+
+    /**
      * Import a Certificate
      *
      * @param publicKeyId the key Optional
@@ -438,11 +535,7 @@ public class KmsClient {
             throw e;
         } catch (Exception e) {
             String err =
-                    "CoverCrypt"
-                            + ": Public Master Key could not be imported: "
-                            + e.getMessage()
-                            + "  "
-                            + e.getClass();
+                    ": Certificate could not be imported: " + e.getMessage() + "  " + e.getClass();
             logger.severe(err);
             throw new CloudproofException(err, e);
         }

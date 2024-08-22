@@ -240,11 +240,11 @@ public class Kmip {
      * @throws CloudproofException if the request fails
      */
     public ImportResponse importObject(Import request) throws CloudproofException {
-        logger.finer(() -> "Import " + request.toString());
+        logger.info(() -> "Import " + request.toString());
         try {
             String json_req = this.mapper.writeValueAsString(request);
             String json_resp = this.rest_client.json_post("/kmip/2_1", json_req);
-            logger.finer(() -> json_resp);
+            logger.info(() -> json_resp);
             return this.mapper.readValue(json_resp, ImportResponse.class);
         } catch (Exception e) {
             String err = "KMIP: Import failed: " + e.getMessage() + "  " + e.getClass();

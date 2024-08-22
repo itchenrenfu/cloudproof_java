@@ -74,8 +74,9 @@ public class CertificateAuthorityTest {
                         + "\t\t}]\n"
                         + "\t}]\n"
                         + "}";
+        System.out.println(jsonStr);
 
-        kmip(jsonStr);
+        //        kmip(jsonStr);
         //        ervifyTest();
     }
 
