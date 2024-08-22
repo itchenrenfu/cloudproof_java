@@ -583,7 +583,8 @@ public class KmsClient {
                             attributes,
                             new Certificate(
                                     Optional.of(CertificateType.X509),
-                                    Optional.of(Base64.decode(certificate))));
+                                    Optional.of(Base64.decode(certificate)),
+                                    Optional.empty()));
             ImportResponse response = this.kmip.importObject(request);
             return response.getUniqueIdentifier();
         } catch (CloudproofException e) {

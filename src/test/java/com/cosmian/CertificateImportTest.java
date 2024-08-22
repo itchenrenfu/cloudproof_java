@@ -19,13 +19,15 @@ import org.junit.jupiter.api.Test;
 public class CertificateImportTest {
     private ObjectMapper mapper = new ObjectMapper();
 
+    private String KMS_URL = "http://172.19.100.3:9998";
+
     @Test
     public void improtTest() throws CloudproofException {
-        if (!TestUtils.serverAvailable(TestUtils.kmsServerUrl())) {
+        if (!TestUtils.serverAvailable(KMS_URL)) {
             throw new RuntimeException("Demo: No KMS Server available");
         }
         // 创建KmsClient
-        final KmsClient kmsClient = new KmsClient(TestUtils.kmsServerUrl(), TestUtils.apiKey());
+        final KmsClient kmsClient = new KmsClient(KMS_URL, TestUtils.apiKey());
         String certificate =
                 "MIIDyTCCArGgAwIBAgIUAtz5wklQnSnCjUME8zXN+ihUQe4wDQYJKoZIhvcNAQEL\n"
                         + "BQAwdDELMAkGA1UEBhMCQ04xDjAMBgNVBAgMBU5VSEFOMREwDwYDVQQHDAhDSEFO\n"
@@ -51,10 +53,11 @@ public class CertificateImportTest {
 
         System.out.println(Hex.encodeHexString(Base64.decode(certificate)));
 
+        // 导入证书，数字证书的公私钥ID可以不用传。如果需要传，则需要先导入RSA公私钥。可参考RsaKeyImportTest示例
         String certificateId =
                 kmsClient.importCertificate(
-                        "564d632a-7989-4d3b-b593-0f5ba1b14cf1",
-                        "564d632a-7989-4d3b-b593-0f5ba1b14cf1",
+                        "9f154403-4a2a-4341-9834-140161179e26",
+                        "6d518e6e-b62e-4f3c-8324-8f939942aa79",
                         certificate,
                         false);
         System.out.println(certificateId);
